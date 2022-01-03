@@ -1,21 +1,21 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "PlayerPrefsSerializeProvider", menuName = "SaveLoadSystem/PlayerPrefsSerializeProvider")]
-public class PlayerPrefsSerializeProvider : SerializeProvider
+[CreateAssetMenu(fileName = "FileSerializeProvider.Asset", menuName = "SaveLoadSystem/FileSerializeProvider")]
+public class FileSerializeProvider : SerializeProvider
 {
     private string Path(string fileName)
     {
-        return fileName;
+        return $"{Application.persistentDataPath}/{fileName}";
     }
 
+    /// <inheritdoc/>
     public override string Read(string fileName)
     {
         try
         {
-            return PlayerPrefs.GetString(this.Path(fileName));
+            return File.ReadAllText(this.Path(fileName));
         }
         catch (Exception ex)
         {
@@ -27,15 +27,15 @@ public class PlayerPrefsSerializeProvider : SerializeProvider
         }
     }
 
+    /// <inheritdoc/>
     public override void Write(string data, string fileName, Action<bool> isWriteDone)
     {
         try
         {
-            PlayerPrefs.SetString(fileName, data);
+            File.WriteAllText(this.Path(fileName), data);
         }
         catch (Exception ex)
         {
-            isWriteDone(false);
             throw new Exception(ex.Message);
         }
         finally
@@ -45,4 +45,3 @@ public class PlayerPrefsSerializeProvider : SerializeProvider
         }
     }
 }
-
