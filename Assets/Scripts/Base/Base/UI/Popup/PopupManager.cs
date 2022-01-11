@@ -1,18 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using MoreMountains.Tools;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TheLegends.Unity.Base
 {
-    public class PopupManager : PersistentSingleton<PopupManager>
+    public class PopupManager : MMPersistentSingleton<PopupManager>
     {
         [SerializeField] private Transform canvas;
         public List<PopupController> listCurrentPopUp = new List<PopupController>();
 
         public T ShowPopUp<T>(string popUpName) where T : PopupController
         {
+            if (IsPopupExisted(popUpName)) return null;
+            
             T popUp = GameObject.Instantiate(Resources.Load<GameObject>("PopUp/" + popUpName), canvas)
                 .GetComponentInChildren<T>();
             popUp.name = popUpName;
@@ -61,6 +64,11 @@ namespace TheLegends.Unity.Base
         {
             return listCurrentPopUp.FirstOrDefault(_ => _.name.Equals(popupName));
         }
+
+        public bool IsPopupExisted(string popupName)
+        {
+            return (GetPopup(popupName) != null);
+        }
     }
 
     public class PopUpName
@@ -74,9 +82,10 @@ namespace TheLegends.Unity.Base
         public const string PopupContinue = "PopupContinue";
         public const string PopupAdsUnavailable = "PopupAdsUnavailable";
         public const string PopupDailyReward = "PopupDailyReward";
-        public const string PopupDailyRewardReward = "PopupDailyRewardReward";
+        public const string PopupRewardClaim = "PopupRewardClaim";
         public const string PopupShopSkin = "PopupShopSkin";
         public const string PopupSpin = "PopupSpin";
         public const string PopupShopIAP = "PopupShopIAP";
+        public const string PopupRate = "PopupRate";
     }
 }
