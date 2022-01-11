@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace TheLegends.Unity.Base
 {
-    public class PopupManager : MMPersistentSingleton<PopupManager>
+    public class PopupManager : PersistentSingleton<PopupManager>
     {
         [SerializeField] private Transform canvas;
         public List<PopupController> listCurrentPopUp = new List<PopupController>();
