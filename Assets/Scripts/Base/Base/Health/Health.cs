@@ -55,7 +55,7 @@ public class Health : MonoBehaviour
 
 
     protected bool _initialized = false;
-    // protected MMHealthBar _healthBar;
+    protected MMHealthBar _healthBar;
     protected AutoRespawn _autoRespawn;
     protected Collider2D _collider2D;
     [SerializeField] protected AnimationController _animationController;
@@ -69,8 +69,10 @@ public class Health : MonoBehaviour
     {
         _collider2D = this.gameObject.GetComponent<Collider2D>();
         _autoRespawn = this.gameObject.GetComponent<AutoRespawn>();
+        _healthBar = this.gameObject.GetComponent<MMHealthBar>();
         CurrentHealth = InitialHealth;
         DamageEnabled();
+        UpdateHealthBar(false);
         _initialized = true;
     }
 
@@ -114,11 +116,14 @@ public class Health : MonoBehaviour
         {
             _animationController.PlayAnim("Hit");
         }
-        
+
         OnHit?.Invoke(damage);
 
         // we play the damage feedback
         DamageFeedbacks?.PlayFeedbacks(this.transform.position);
+
+        // we update the health bar
+        UpdateHealthBar(true);
 
         // if health has reached zero
         if (CurrentHealth <= 0)
@@ -126,6 +131,49 @@ public class Health : MonoBehaviour
             // we set its health to zero (useful for the healthbar)
             CurrentHealth = 0;
             Kill();
+        }
+    }
+
+    /// <summary>
+    /// Called when the character gets health (from a stimpack for example)
+    /// </summary>
+    /// <param name="health">The health the character gets.</param>
+    /// <param name="instigator">The thing that gives the character health.</param>
+    public virtual void GetHealth(int health, GameObject instigator)
+    {
+        // this function adds health to the character's Health and prevents it to go above MaxHealth.
+        CurrentHealth = Mathf.Min(CurrentHealth + health, MaximumHealth);
+        UpdateHealthBar(true);
+    }
+
+    /// <summary>
+    /// Sets the health of the character to the one specified in parameters
+    /// </summary>
+    /// <param name="newHealth"></param>
+    /// <param name="instigator"></param>
+    public virtual void SetHealth(int newHealth, GameObject instigator)
+    {
+        CurrentHealth = Mathf.Min(newHealth, MaximumHealth);
+        UpdateHealthBar(false);
+    }
+
+    /// <summary>
+    /// Resets the character's health to its max value
+    /// </summary>
+    public virtual void ResetHealthToMaxHealth()
+    {
+        CurrentHealth = MaximumHealth;
+        UpdateHealthBar(false);
+    }
+
+    /// <summary>
+    /// Updates the character's health bar progress.
+    /// </summary>
+    public virtual void UpdateHealthBar(bool show)
+    {
+        if (_healthBar != null)
+        {
+            _healthBar.UpdateBar(CurrentHealth, 0f, MaximumHealth, show);
         }
     }
 
@@ -153,7 +201,7 @@ public class Health : MonoBehaviour
                 _collider2D.enabled = false;
             }
         }
-        
+
         if (DelayBeforeDestruction > 0f)
         {
             Invoke("DestroyObject", DelayBeforeDestruction);
@@ -163,10 +211,10 @@ public class Health : MonoBehaviour
             // finally we destroy the object
             DestroyObject();
         }
-        
+
         OnDeath?.Invoke();
     }
-    
+
     /// <summary>
     /// Destroys the object, or tries to, depending on the character's settings
     /// </summary>
@@ -188,7 +236,7 @@ public class Health : MonoBehaviour
             _autoRespawn.Kill();
         }
     }
-    
+
     /// <summary>
     /// Revive this object.
     /// </summary>
@@ -203,12 +251,13 @@ public class Health : MonoBehaviour
         {
             _collider2D.enabled = true;
         }
-        
+
         Init();
 
+        UpdateHealthBar(false);
         OnRevive?.Invoke();
     }
-    
+
     /// <summary>
     /// Prevents the character from taking any damage
     /// </summary>
@@ -216,7 +265,7 @@ public class Health : MonoBehaviour
     {
         Invulnerable = true;
     }
-    
+
     /// <summary>
     /// Allows the character to take damage
     /// </summary>
