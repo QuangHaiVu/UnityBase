@@ -1,3 +1,4 @@
+using System.Collections;
 using MoreMountains.Feedbacks;
 using MoreMountains.Tools;
 using UnityEngine;
@@ -21,6 +22,9 @@ public class Health : MonoBehaviour
 
     [Tooltip("if this is true, this object can't take damage")]
     public bool Invulnerable = false;
+
+    [Tooltip("Total time of Invulnerable")]
+    public float InvincibilityDuration;
 
     [Header("Damage")]
     [MMInformation(
@@ -111,6 +115,13 @@ public class Health : MonoBehaviour
 
         // we decrease the character's health by the damage
         CurrentHealth -= damage;
+        
+        // we prevent the character from colliding with Projectiles, Player and Enemies
+        if (InvincibilityDuration > 0)
+        {
+            DamageDisabled();
+            StartCoroutine(DamageEnabled(InvincibilityDuration));
+        }
 
         if (_animationController != null)
         {
@@ -271,6 +282,15 @@ public class Health : MonoBehaviour
     /// </summary>
     public virtual void DamageEnabled()
     {
+        Invulnerable = false;
+    }
+    
+    /// <summary>
+    /// Allows the character to take damage
+    /// </summary>
+    public virtual IEnumerator DamageEnabled(float delay)
+    {
+        yield return MMCoroutine.WaitFor(delay);
         Invulnerable = false;
     }
 }
