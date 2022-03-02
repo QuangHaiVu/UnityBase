@@ -39,7 +39,7 @@ public static class Utils
     {
         var type = typeof(T);
         object value = null;
-        
+
         if (type == typeof(int))
         {
             value = Convert.ChangeType(PlayerPrefs.GetInt(key, 0), type);
@@ -55,8 +55,8 @@ public static class Utils
             value = Convert.ChangeType(PlayerPrefs.GetFloat(key, 0f), type);
         }
 
-        return (T) value;
-    } 
+        return (T)value;
+    }
 
     private static bool IsCorrectValue<T>(PlayerPrefsType type, T value)
     {
@@ -86,7 +86,7 @@ public static class Utils
     #endregion
 
     #region Files
-    
+
     public static bool ExistsFile(string name)
     {
         return File.Exists(FileNameToPath(name));
@@ -115,7 +115,7 @@ public static class Utils
             {
                 using (FileStream file = File.Open(path, FileMode.OpenOrCreate))
                 {
-                    binaryFormatter.Serialize(file, (T)data);   
+                    binaryFormatter.Serialize(file, (T)data);
                     file.Close();
                     Debug.Log("[SaveData] Done: " + fileName + " " + DateTime.Now + "\n" + path);
                 }
@@ -211,11 +211,37 @@ public static class Utils
 
     public static T ParseEnum<T>(string value)
     {
-        return (T) Enum.Parse(typeof(T), value, true);
+        return (T)Enum.Parse(typeof(T), value, true);
     }
 
     #endregion
 
+    #region List
+
+    public static bool ContainsSequence<T>(this List<T> source, List<T> target)
+    {
+        //Nếu muốn so sánh object của 2 struct, class thi class implement IEquatable và override lại method Equal()
+        var targetCount = target.Count;
+
+        for (int i = 0; i < source.Count - targetCount + 1; i++)
+        {
+            bool isMatch = true;
+            for (int x = 0; x < targetCount; x++)
+            {
+                if (!source[i + x].Equals(target[x]))
+                {
+                    isMatch = false;
+                    break;
+                }
+            }
+
+            if (isMatch) return true;
+        }
+
+        return false;
+    }
+
+    #endregion
 }
 
 public enum PlayerPrefsType
