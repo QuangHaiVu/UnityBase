@@ -213,6 +213,11 @@ public static class Utils
     {
         return (T)Enum.Parse(typeof(T), value, true);
     }
+    
+    public static List<T> ParseEnumToList<T>()
+    {
+        return Enum.GetValues(typeof(T)).Cast<T>().ToList();
+    }
 
     #endregion
 
