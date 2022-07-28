@@ -247,6 +247,17 @@ public static class Utils
     }
 
     #endregion
+        
+    #region Text
+
+    public static string EnterLineText(string inputString)
+    {
+        var targetText = inputString;
+        targetText = targetText.Replace("\\n", "\n");
+        return targetText;
+    }
+
+    #endregion
 }
 
 public enum PlayerPrefsType
