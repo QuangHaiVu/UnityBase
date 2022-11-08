@@ -1,46 +1,61 @@
+using System.Collections;
 using Firebase;
-using Firebase.Analytics;
+using MoreMountains.Tools;
 using UnityEngine;
 
-public class FirebaseController : PersistentSingleton<FirebaseController>
+namespace TheLegends.Unity.Base
 {
-    private DependencyStatus dependencyStatus = DependencyStatus.UnavailableOther;
-    private bool firebaseInitialized = false;
-    
-    void Start()
+    public class FirebaseController : MMPersistentSingleton<FirebaseController>
     {
-        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
+        private DependencyStatus dependencyStatus = DependencyStatus.UnavailableOther;
+        private bool firebaseInitialized = false;
+        
+        void Start()
         {
-            dependencyStatus = task.Result;
+            StartCoroutine(InitializeFirebase());
+        }
+
+        public IEnumerator InitializeFirebase(float timeOut = 3f)
+        {
+            var elapsedTime = 0f;
+
+            FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
+            {
+                dependencyStatus = task.Result;
+                if (dependencyStatus == DependencyStatus.Available)
+                {
+                    Debug.Log("[Firebase] CheckDependencies: " + task.Result);
+                }
+                else
+                {
+                    Debug.LogError(
+                        "[Firebase] Could not resolve all Firebase dependencies: " + dependencyStatus);
+                    Debug.Log("[Firebase] CheckDependencies: " + task.Result);
+                }
+            });
+
+            while (dependencyStatus != DependencyStatus.Available && elapsedTime < timeOut)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return new WaitForSeconds(1);
+            }
+
             if (dependencyStatus == DependencyStatus.Available)
             {
-                InitializeFirebase();
+                InitializeFirebaseDone();
             }
-            else
-            {
-                Debug.LogError(
-                    "Could not resolve all Firebase dependencies: " + dependencyStatus);
-            }
-        });
-    }
-
-    private void InitializeFirebase()
-    {
-        Debug.Log("Enabling data collection.");
-        FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
-        firebaseInitialized = true;
-    }
-
-    public bool IsFirebaseInitialized()
-    {
-        if (firebaseInitialized)
-        {
-            return true;
         }
-        else
+
+        private void InitializeFirebaseDone()
         {
-            InitializeFirebase();
-            return false;
+            firebaseInitialized = true;
+            FirebaseAnalyticsHelper.EnableCollectData(true);
+            FirebaseRemoteConfigHelper.Init();
+        }
+
+        public bool IsFirebaseInitialized()
+        {
+            return firebaseInitialized;
         }
     }
 }
