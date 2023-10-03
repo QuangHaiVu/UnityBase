@@ -260,6 +260,34 @@ public static class Utils
     }
 
     #endregion
+
+    #region Enumerable
+
+    public static class EnumerableHelper<E>
+    {
+        private static System.Random r;
+
+        static EnumerableHelper()
+        {
+            r = new System.Random();
+        }
+
+        public static T Random<T>(IEnumerable<T> input)
+        {
+            return input.ElementAt(r.Next(input.Count()));
+        }
+
+    }
+
+    public static class EnumerableExtensions
+    {
+        public static T Random<T>(this IEnumerable<T> input)
+        {
+            return EnumerableHelper<T>.Random(input);
+        }
+    }
+        
+    #endregion
 }
 
 public enum PlayerPrefsType
